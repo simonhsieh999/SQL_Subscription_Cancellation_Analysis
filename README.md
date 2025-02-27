@@ -34,7 +34,10 @@ The Subscriptions and Cancellations tables from Jess Ramo's database using Hex w
 ![image](https://github.com/user-attachments/assets/13ccf000-7261-43b7-8c71-42be59dbdc0a)
 The 1st cancellation reason can be the primary reason that users feel strongly about since that reason would be the first reason that they think about. For the user's 1st cancellation reason, "not useful" was the biggest reason, followed by "expensive". For the 2nd cancellation reason, "went to a competitor" was the biggest reason.
 
-- Here were the trends in 2022, 2023, and 2024:
+- Here is a line chart of the trends in 2022, 2023, and 2024:
+  ![image](https://github.com/user-attachments/assets/149757aa-de78-4652-a559-cd70364a46c6)
+
+Also, here are the trends in 2022, 2023, and 2024 in table format:
 
 |                    | 2022 | 2023 | 2024 |
 |--------------------|------|------|------|
