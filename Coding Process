@@ -1,0 +1,104 @@
+-- Determining the completedness of the data by exploring how many users select a 1st, 2nd, and 3rd reason for cancelling:
+
+select
+    count(*) as total_count,
+    count(cancelation_reason1) as count_reason1,
+    count(cancelation_reason2) as count_reason2,
+    count(cancelation_reason3) as count_reason3
+from
+    public.cancelations
+
+-- Computing the count of each of the cancellation reasons for reason 1:
+
+select
+    cancelation_reason1,
+    count(*) as num_instances,
+from
+    public.cancelations
+group by
+    1
+order by
+    2 desc
+
+-- Computing the average of the user's total cancellation reasons and the average of the additional cancellation reasons:
+
+with cancels as(
+select
+    subscription_id,
+    case when cancelation_reason1 is not null then 1 else 0 end as has_reason1,
+    case when cancelation_reason2 is not null then 1 else 0 end as has_reason2,
+    case when cancelation_reason3 is not null then 1 else 0 end as has_reason3,
+    has_reason1 + has_reason2 + has_reason3 as total_reasons,
+    has_reason2 + has_reason3 as additional_reasons
+from
+    public.cancelations
+)
+
+select
+    avg(total_reasons) as avg_total_per_sub,
+    avg(additional_reasons) as avg_additional_per_sub
+from
+    cancels
+
+-- Combining all 3 cancellation reasons into 1 column using unions, and having a reason_number column indicating which of the 3 reasons is it. Also creating a view of it:
+
+create or replace view junk.all_cancelation_reasons_simon as
+select
+    subscription_id,
+    cancel_date,
+    cancelation_reason1 as cancelation_reason,
+    1 as reason_number
+from
+    public.cancelations
+
+union
+
+select
+    subscription_id,
+    cancel_date,
+    cancelation_reason2 as cancelation_reason,
+    2 as reason_number
+from
+    public.cancelations
+
+union
+
+select
+    subscription_id,
+    cancel_date,
+    cancelation_reason3 as cancelation_reason,
+    3 as reason_number
+from
+    public.cancelations
+
+-- Computing the count of each cancellation reason for each reason number in order to identify its trends. Creating a table and visualization out of it:
+
+select
+    cancelation_reason,
+    reason_number,
+    count(subscription_id) as num_subs
+from
+    junk.all_cancelation_reasons_simon
+group by
+    1, 2
+
+-- Calculating the percentage of the number of reasons by the year total each year. Creating a table and visualization out of it:
+
+with yearly as(
+select
+    date_trunc('year', cancel_date::date) as cancel_year,
+    cancelation_reason,
+    count(*) as num_reason
+from
+    junk.all_cancelation_reasons_simon
+group by
+    1,2
+)
+select
+    cancel_year,
+    cancelation_reason,
+    num_reason,
+    sum(num_reason) over(partition by cancel_year) as year_total,
+    num_reason*100/year_total as perc_reason_annual
+from
+    yearly
